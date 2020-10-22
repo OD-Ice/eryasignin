@@ -7,6 +7,7 @@ import datetime
 import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
+import memcache
 
 
 class SignIn:
@@ -46,6 +47,7 @@ class SignIn:
         return html
 
     def parse(self):
+        mc = memcache.Client('127.0.0.1:11211', debug=False)  # 连接memcached
         url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"  # 签到信息提交的网址，这个别动
         html = self.login()
         soup = BeautifulSoup(html, 'lxml')
@@ -56,7 +58,8 @@ class SignIn:
                 onclick = mct_nod.attrs['onclick']
                 activeId = re.search(r'activeDetail\((.*?),', onclick).group(1)
                 activeType = int(re.search(r',(.*?),', onclick).group(1))
-                if activeType == 2:
+                memcache_activeId = mc.get(activeId)  # 判断缓存中是否已经完成任务
+                if activeType == 2 and not memcache_activeId:
                     data = {
                         'name': '',  # 感觉没啥用？好像是显示的签到者名字，不太清楚
                         'address': '阿斯加德',  # 修改成需要显示的地址
@@ -69,6 +72,7 @@ class SignIn:
                     print(f'签到结果：{res.text}')
                     if res.text == 'success':
                         self.email('签到成功！你男朋友真厉害！')  # 签到成功发送的消息
+                        mc.set(activeId, activeId, time=60*30)  # 将签到成功的任务加入缓存
                     else:
                         self.email('签到失败！快联系你对象改bug了！')  # 签到失败发送的消息
 
