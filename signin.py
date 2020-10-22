@@ -47,7 +47,7 @@ class SignIn:
         return html
 
     def parse(self):
-        mc = memcache.Client('127.0.0.1:11211', debug=False)  # 连接memcached
+        mc = memcache.Client(['127.0.0.1:11211'], debug=False)  # 连接memcached
         url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"  # 签到信息提交的网址，这个别动
         html = self.login()
         soup = BeautifulSoup(html, 'lxml')
