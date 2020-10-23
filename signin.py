@@ -73,6 +73,9 @@ class SignIn:
                     if res.text == 'success':
                         self.email('签到成功！你男朋友真厉害！')  # 签到成功发送的消息
                         mc.set(activeId, activeId, time=60*30)  # 将签到成功的任务加入缓存
+                    elif res.text == '您已签到过了':
+                        self.email('宝贝儿会自己签到了！厉害！')  # 自己签到发送的消息
+                        mc.set(activeId, activeId, time=60 * 30)
                     else:
                         self.email('签到失败！快联系你对象改bug了！')  # 签到失败发送的消息
 
